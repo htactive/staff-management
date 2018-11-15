@@ -14,15 +14,24 @@ namespace StaffManagement.Controllers
     {
         [HttpPost]
         [Route("Search")]
-        public IEnumerable<StaffModel> Search([FromBody]FilterStaffModel model)
+        public StaffFilterResult Search(FilterStaffModel model)
         {
-            return new List<StaffModel>() {
-                new StaffModel(){
-                    Department = model.Department,
-                    Education = model.Education,
-                    FullName = model.FullName,
-                    Id= 100
-                }
+            var rows = new List<StaffModel>();
+            for (int i = 0; i < 10; i++)
+            {
+                rows.Add(new StaffModel()
+                {
+                    email = "email" + i,
+                    firstname = "firstname" + i,
+                    lastname = "lastname" + i,
+                    phone = "phone" + i,
+                    Id = i
+                });
+            }
+            return new StaffFilterResult()
+            {
+                rows = rows,
+                total = 10
             };
         }
 
@@ -31,26 +40,34 @@ namespace StaffManagement.Controllers
         {
             return new StaffModel()
             {
-                Department = "d111",
-                Education = "sdsd",
-                FullName = "sdsdsdsd",
                 Id = id
             };
         }
 
-        // POST: api/Staff
         [HttpPost]
-        public StaffModel Post([FromBody]StaffModel model)
+        [Route("create")]
+        public StaffModel Create(StaffModel model)
         {
-            model.Id += 10;
             return model;
         }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public bool Delete(int id)
+        [HttpPost]
+        [Route("update")]
+        public StaffModel Update(int id, StaffModel model)
         {
-            return id % 2 == 1;
+            model.Id = id % 2 == 1 ? 100 : 200;
+            return model;
+        }
+
+        [HttpPost("{id}")]
+        [Route("delete")]
+        public ApiResponse<bool> Delete(int id)
+        {
+            return new ApiResponse<bool>()
+            {
+                data = id % 2 == 1,
+                success = true
+            };
         }
     }
 }
