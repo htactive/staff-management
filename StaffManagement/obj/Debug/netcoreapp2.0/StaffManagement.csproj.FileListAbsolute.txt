@@ -1,0 +1,11 @@
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\bin\Debug\netcoreapp2.0\StaffManagement.deps.json
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\bin\Debug\netcoreapp2.0\StaffManagement.runtimeconfig.json
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\bin\Debug\netcoreapp2.0\StaffManagement.runtimeconfig.dev.json
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\bin\Debug\netcoreapp2.0\StaffManagement.dll
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.csprojAssemblyReference.cache
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.csproj.CoreCompileInputs.cache
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.AssemblyInfoInputs.cache
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.AssemblyInfo.cs
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\bin\Debug\netcoreapp2.0\StaffManagement.pdb
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.dll
+C:\Users\hot\source\repos\StaffManagement\StaffManagement\obj\Debug\netcoreapp2.0\StaffManagement.pdb
