@@ -10,13 +10,18 @@ namespace StaffManagement.DataContext
 {
     public class StaffContext : IStaffContext
     {
-        public static string connectionString = "server=.;user id=root;pwd=abcde12345-;persistsecurityinfo=True;database=sdb";
+        private DbConfiguration _configuration { get; set; }
+        public StaffContext(DbConfiguration configuration)
+        {
+            this._configuration = configuration;
+        }
         public async Task Create(StaffModel model)
         {
-            using (var connection = new MySqlConnection(connectionString))
+            using (var connection = new MySqlConnection(_configuration.ConnectionString))
             {
+                await connection.OpenAsync();
                 var cmd = connection.CreateCommand() as MySqlCommand;
-                cmd.CommandText = @"INSERT INTO `Staff` (`firstname`, `lastname`, `phone`, `email`) VALUES (@firstname, @lastname, @phone, @email);";
+                cmd.CommandText = @"INSERT INTO `staff` (`firstname`, `lastname`, `phone`, `email`) VALUES (@firstname, @lastname, @phone, @email);";
                 BindParams(cmd, model);
                 await cmd.ExecuteNonQueryAsync();
                 connection.Close();
@@ -25,8 +30,9 @@ namespace StaffManagement.DataContext
 
         public async Task Delete(int staffId)
         {
-            using (var connection = new MySqlConnection(connectionString))
+            using (var connection = new MySqlConnection(_configuration.ConnectionString))
             {
+                await connection.OpenAsync();
                 var cmd = connection.CreateCommand() as MySqlCommand;
                 cmd.Parameters.Add(new MySqlParameter
                 {
@@ -34,7 +40,7 @@ namespace StaffManagement.DataContext
                     DbType = DbType.Int32,
                     Value = staffId,
                 });
-                cmd.CommandText = @"DELETE FROM `BlogPost` WHERE `Id` = @id;";
+                cmd.CommandText = @"DELETE FROM `staff` WHERE `Id` = @id;";
                 await cmd.ExecuteNonQueryAsync();
                 connection.Close();
             }
@@ -42,15 +48,58 @@ namespace StaffManagement.DataContext
 
         public async Task<StaffFilterResult> Filter(int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            var staffFilterResult = new StaffFilterResult()
+            {
+                rows = new List<StaffModel>()
+            };
+            using (var connection = new MySqlConnection(_configuration.ConnectionString))
+            {
+                await connection.OpenAsync();
+                var cmd = connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"SELECT count(1) as total from `staff`";
+                var result = await cmd.ExecuteReaderAsync();
+                result.Read();
+                staffFilterResult.total = Convert.ToInt32(result["total"]);
+                connection.Close();
+
+                await connection.OpenAsync();
+                cmd.CommandText = @"SELECT * from `staff` LIMIT @from,@to";
+                cmd.Parameters.Add(new MySqlParameter
+                {
+                    ParameterName = "@from",
+                    DbType = DbType.Int32,
+                    Value = pageNumber * pageSize,
+                });
+                cmd.Parameters.Add(new MySqlParameter
+                {
+                    ParameterName = "@to",
+                    DbType = DbType.Int32,
+                    Value = (pageNumber + 1) * pageSize,
+                });
+                var rows = await cmd.ExecuteReaderAsync();
+                while (rows.Read())
+                {
+                    staffFilterResult.rows.Add(new StaffModel()
+                    {
+                        Id = Convert.ToInt32(rows["Id"]),
+                        firstname = Convert.ToString(rows["firstname"]),
+                        lastname = Convert.ToString(rows["lastname"]),
+                        email = Convert.ToString(rows["email"]),
+                        phone = Convert.ToString(rows["phone"]),
+                    });
+                }
+                connection.Close();
+            }
+            return staffFilterResult;
         }
 
         public async Task Update(StaffModel model)
         {
-            using (var connection = new MySqlConnection(connectionString))
+            using (var connection = new MySqlConnection(_configuration.ConnectionString))
             {
+                await connection.OpenAsync();
                 var cmd = connection.CreateCommand() as MySqlCommand;
-                cmd.CommandText = @"UPDATE `BlogPost` SET `firstname` = @firstname, `lastname` = @lastname, `email` = @email, `phone` = @phone WHERE `Id` = @id;";
+                cmd.CommandText = @"UPDATE `staff` SET `firstname` = @firstname, `lastname` = @lastname, `email` = @email, `phone` = @phone WHERE `Id` = @id;";
                 BindParams(cmd, model);
                 cmd.Parameters.Add(new MySqlParameter
                 {

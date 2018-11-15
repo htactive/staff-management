@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StaffManagement.DataContext;
 using StaffManagement.Models;
 
 namespace StaffManagement.Controllers
@@ -12,60 +13,48 @@ namespace StaffManagement.Controllers
     [Route("api/Staff")]
     public class StaffController : Controller
     {
+        private IStaffContext staffContext;
+        public StaffController(IStaffContext staffContext)
+        {
+            this.staffContext = staffContext;
+        }
         [HttpPost]
         [Route("Search")]
-        public StaffFilterResult Search(FilterStaffModel model)
+        public async Task<StaffFilterResult> Search(FilterStaffModel model)
         {
-            var rows = new List<StaffModel>();
-            for (int i = 0; i < 10; i++)
-            {
-                rows.Add(new StaffModel()
-                {
-                    email = "email" + i,
-                    firstname = "firstname" + i,
-                    lastname = "lastname" + i,
-                    phone = "phone" + i,
-                    Id = i
-                });
-            }
-            return new StaffFilterResult()
-            {
-                rows = rows,
-                total = 10
-            };
-        }
-
-        [HttpGet("{id}", Name = "Get")]
-        public StaffModel Get(int id)
-        {
-            return new StaffModel()
-            {
-                Id = id
-            };
+            return await staffContext.Filter(model.page - 1, model.rows);
         }
 
         [HttpPost]
         [Route("create")]
-        public StaffModel Create(StaffModel model)
+        public async Task<ApiResponse<bool>> Create(StaffModel model)
         {
-            return model;
+            await staffContext.Create(model);
+            return new ApiResponse<bool>()
+            {
+                success = true
+            };
         }
 
         [HttpPost]
         [Route("update")]
-        public StaffModel Update(int id, StaffModel model)
+        public async Task<ApiResponse<bool>> Update(int id, StaffModel model)
         {
-            model.Id = id % 2 == 1 ? 100 : 200;
-            return model;
+            model.Id = id;
+            await staffContext.Update(model);
+            return new ApiResponse<bool>()
+            {
+                success = true
+            };
         }
 
         [HttpPost("{id}")]
         [Route("delete")]
-        public ApiResponse<bool> Delete(int id)
+        public async Task<ApiResponse<bool>> Delete(int id)
         {
+            await staffContext.Delete(id);
             return new ApiResponse<bool>()
             {
-                data = id % 2 == 1,
                 success = true
             };
         }

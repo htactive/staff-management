@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StaffManagement.DataContext
 {
-    interface IStaffContext
+    public interface IStaffContext
     {
         Task<StaffFilterResult> Filter(int pageNumber, int pageSize);
         Task Update(StaffModel model);
