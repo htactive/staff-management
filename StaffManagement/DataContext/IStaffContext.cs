@@ -8,9 +8,9 @@ namespace StaffManagement.DataContext
 {
     interface IStaffContext
     {
-        StaffFilterResult Filter(int pageNumber, int pageSize);
-        void Update(StaffModel model);
-        void Create(StaffModel model);
-        void Delete(int staffId);
+        Task<StaffFilterResult> Filter(int pageNumber, int pageSize);
+        Task Update(StaffModel model);
+        Task Create(StaffModel model);
+        Task Delete(int staffId);
     }
 }
