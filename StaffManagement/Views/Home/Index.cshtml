@@ -1,130 +1,199 @@
-﻿<h2>Basic CRUD Application</h2>
-<p>Click the buttons on datagrid toolbar to do crud actions.</p>
+﻿
+<style>
+    input[type='submit'], button, [aria-label] {
+        cursor: pointer;
+    }
 
-<table id="dg" title="Staffs" class="easyui-datagrid" style="width:700px;height:250px"
-       url="/api/staff/search"
-       toolbar="#toolbar" pagination="true"
-       rownumbers="true" fitColumns="true" singleSelect="true">
-    <thead>
-        <tr>
-            <th field="firstname" width="50">First Name</th>
-            <th field="lastname" width="50">Last Name</th>
-            <th field="phone" width="50">Phone</th>
-            <th field="email" width="50">Email</th>
-        </tr>
-    </thead>
-</table>
-<div id="toolbar">
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newStaff()">New Staff</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editStaff()">Edit Staff</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyStaff()">Remove Staff</a>
-</div>
+    #spoiler {
+        display: none;
+    }
 
-<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
-     closed="true" buttons="#dlg-buttons">
-    <div class="ftitle">Staff Information</div>
-    <form id="fm" method="post" novalidate>
-        <div class="fitem">
-            <label>First Name:</label>
-            <input name="firstname" class="easyui-textbox" required="true">
-        </div>
-        <div class="fitem">
-            <label>Last Name:</label>
-            <input name="lastname" class="easyui-textbox" required="true">
-        </div>
-        <div class="fitem">
-            <label>Phone:</label>
-            <input name="phone" class="easyui-textbox">
-        </div>
-        <div class="fitem">
-            <label>Email:</label>
-            <input name="email" class="easyui-textbox" validType="email">
-        </div>
+    table {
+        width: 100%;
+        max-width: 500px;
+    }
+</style>
+<form action="javascript:void(0);" method="POST" onsubmit="app.Add()">
+    <input type="text" id="firstname" placeholder="firstname">
+    <input type="text" id="lastname" placeholder="lastname">
+    <input type="text" id="email" placeholder="email">
+    <input type="text" id="phone" placeholder="phone">
+    <input type="submit" value="Add">
+</form>
+
+<div id="spoiler">
+    <form action="javascript:void(0);" method="POST" id="saveEdit">
+        <input type="text" id="edit-firstname" placeholder="firstname">
+        <input type="text" id="edit-lastname" placeholder="lastname">
+        <input type="text" id="edit-email" placeholder="email">
+        <input type="text" id="edit-phone" placeholder="phone">
+        <input type="submit" value="Edit" /> <a onclick="CloseInput()" aria-label="Close">&#10006;</a>
     </form>
 </div>
-<div id="dlg-buttons">
-    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveStaff()" style="width:90px">Save</a>
-    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
-</div>
-<script type="text/javascript">
-var url;
-function newStaff() {
-        $('#dlg').dialog('open').dialog('setTitle', 'New Staff');
-        $('#fm').form('clear');
-        url = '/api/staff/create';
-}
-function editStaff() {
-        var row = $('#dg').datagrid('getSelected');
-        if (row) {
-            $('#dlg').dialog('open').dialog('setTitle', 'Edit Staff');
-            $('#fm').form('load', row);
-            url = '/api/staff/update?id=' + row.id;
-        }
-}
-function saveStaff() {
-        $('#fm').form('submit', {
-            url: url,
-            onSubmit: function () {
-                return $(this).form('validate');
-            },
-            success: function (result) {
-                var result = eval('(' + result + ')');
-                if (result.errorMsg) {
-                    $.messager.show({
-                        title: 'Error',
-                        msg: result.errorMsg
-                    });
-                } else {
-                    $('#dlg').dialog('close');		// close the dialog
-                    $('#dg').datagrid('reload');	// reload the staff data
+
+<p id="counter"></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th style="width:1px;"></th>
+        </tr>
+    </thead>
+    <tbody id="staffs"></tbody>
+</table>
+
+<script>
+    var app = new function () {
+
+        this.el = document.getElementById('staffs');
+
+        this.staffs = [];
+
+        this.Count = function (data) {
+            var el = document.getElementById('counter');
+            var name = 'staff';
+
+            if (data) {
+                if (data > 1) {
+                    name = 'staffs';
+                }
+                el.innerHTML = data + ' ' + name;
+            } else {
+                el.innerHTML = 'No ' + name;
+            }
+        };
+
+        this.FetchAll = function () {
+            var data = '';
+
+            if (this.staffs.length > 0) {
+                for (i = 0; i < this.staffs.length; i++) {
+                    data += '<tr>';
+                    data += '<td>' + this.staffs[i].firstname + '</td>';
+                    data += '<td>' + this.staffs[i].lastname + '</td>';
+                    data += '<td>' + this.staffs[i].email + '</td>';
+                    data += '<td>' + this.staffs[i].phone + '</td>';
+                    data += '<td><button onclick="app.Edit(' + this.staffs[i].id + ')">Edit</button></td>';
+                    data += '<td><button onclick="app.Delete(' + this.staffs[i].id + ')">Delete</button></td>';
+                    data += '</tr>';
                 }
             }
-        });
-}
-function destroyStaff() {
-        var row = $('#dg').datagrid('getSelected');
-        if (row) {
-            $.messager.confirm('Confirm', 'Are you sure you want to destroy this staff?', function (r) {
-                if (r) {
-                    $.post('/api/staff/delete', { id: row.id }, function (result) {
-                        if (result.success) {
-                            $('#dg').datagrid('reload');	// reload the staff data
-                        } else {
-                            $.messager.show({	// show error message
-                                title: 'Error',
-                                msg: result.errorMsg
-                            });
-                        }
-                    }, 'json');
+
+            this.Count(this.staffs.length);
+            return this.el.innerHTML = data;
+        };
+
+        this.Add = function () {
+            var formData = new FormData();
+            formData.append('firstname', document.getElementById('firstname').value);
+            formData.append('lastname', document.getElementById('lastname').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('id', 0);
+            var self = this;
+            $.ajax({
+                url: '/api/staff/create',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function () {
+                    // Reset input value
+                    document.getElementById('firstname').value = '';
+                    document.getElementById('lastname').value = '';
+                    document.getElementById('phone').value = '';
+                    document.getElementById('email').value = '';
+                    self.Reload();
                 }
             });
-        }
-}
+        };
+
+        this.Edit = function (item) {
+            var staff = this.staffs.filter(function (a) { return a.id == item })[0];
+            if (staff == null) return;
+            // Display value in the field
+            document.getElementById('edit-firstname').value = staff.firstname;
+            document.getElementById('edit-lastname').value = staff.lastname;
+            document.getElementById('edit-email').value = staff.email;
+            document.getElementById('edit-phone').value = staff.phone;
+            // Display fields
+            document.getElementById('spoiler').style.display = 'block';
+            self = this;
+
+            document.getElementById('saveEdit').onsubmit = function () {
+                var formData = new FormData();
+                formData.append('firstname', document.getElementById('edit-firstname').value);
+                formData.append('lastname', document.getElementById('edit-lastname').value);
+                formData.append('phone', document.getElementById('edit-phone').value);
+                formData.append('email', document.getElementById('edit-email').value);
+                formData.append('id', item);
+                $.ajax({
+                    url: '/api/staff/update',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function () {
+                        // Reset input value
+                        document.getElementById('edit-firstname').value = '';
+                        document.getElementById('edit-lastname').value = '';
+                        document.getElementById('edit-phone').value = '';
+                        document.getElementById('edit-email').value = '';
+                        self.Reload();
+                        // Hide fields
+                        CloseInput();
+                    }
+                });
+                
+            }
+        };
+
+        this.Delete = function (item) {
+            var self = this;
+            var formData = new FormData();
+            formData.append('id', item);
+            $.ajax({
+                url: '/api/staff/delete',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    self.Reload();
+                }
+            });
+        };
+
+        this.Reload = function () {
+            var formData = new FormData();
+            formData.append('page', '1');
+            formData.append('rows', '10000');
+            $.ajax({
+                url: '/api/staff/search',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    app.staffs = data.rows;
+                    app.FetchAll();
+                }
+            });
+        };
+
+    }
+
+    //app.FetchAll();
+
+    function CloseInput() {
+        document.getElementById('spoiler').style.display = 'none';
+    }
+
+    $(function () {
+        app.Reload();
+    })
 </script>
-<style type="text/css">
-    #fm {
-        margin: 0;
-        padding: 10px 30px;
-    }
-
-    .ftitle {
-        font-size: 14px;
-        font-weight: bold;
-        padding: 5px 0;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #ccc;
-    }
-
-    .fitem {
-        margin-bottom: 5px;
-    }
-
-        .fitem label {
-            display: inline-block;
-            width: 80px;
-        }
-
-        .fitem input {
-            width: 160px;
-        }
-</style>
