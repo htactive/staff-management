@@ -23,7 +23,7 @@ namespace StaffManagement
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddScoped<IStaffContext, StaffContext>();
+            services.AddScoped<IStaffContext, StaffContextSql>();
             services.AddScoped<DbConfiguration>(_ => new DbConfiguration(Configuration["ConnectionStrings:DefaultConnection"]));
         }
 
