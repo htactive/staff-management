@@ -10,42 +10,68 @@
 
     table {
         width: 100%;
-        max-width: 500px;
+        max-width: 900px;
     }
-</style>
-<form action="javascript:void(0);" method="POST" onsubmit="app.Add()">
-    <input type="text" id="firstname" placeholder="firstname">
-    <input type="text" id="lastname" placeholder="lastname">
-    <input type="text" id="email" placeholder="email">
-    <input type="text" id="phone" placeholder="phone">
-    <input type="submit" value="Add">
-</form>
 
+</style>
+<form action="javascript:void(0);" id="add-form" class="form-inline" method="POST" onsubmit="app.Add()">
+    <div id="firstname-form" class="form-group">
+        <input type="text" class="form-input" id="firstname" placeholder="firstname" onkeyup="return app.validateFirstname()">
+        <p class="help-text"></p>
+    </div>
+    <div id="lastname-form" class="form-group">
+        <input type="text" class="form-input" id="lastname" placeholder="lastname" onkeyup="return app.validateLastname()">
+        <p class="help-text"></p>
+    </div>
+    <div id="email-form" class="form-group">
+        <input type="text" class="form-input" id="email" placeholder="email" onkeyup="return app.validateEmail()">
+        <p class="help-text"></p>
+    </div>
+    <div id="phone-form" class="form-group">
+        <input type="text" class="form-input" id="phone" placeholder="phone" onkeyup="return app.validatePhone()">
+        <p class="help-text"></p>
+    </div>
+    <div class="form-group">
+        <input type="submit" class="form-btn primary" value="Add">
+    </div>
+</form>
 <div id="spoiler">
-    <form action="javascript:void(0);" method="POST" id="saveEdit">
-        <input type="text" id="edit-firstname" placeholder="firstname">
-        <input type="text" id="edit-lastname" placeholder="lastname">
-        <input type="text" id="edit-email" placeholder="email">
-        <input type="text" id="edit-phone" placeholder="phone">
-        <input type="submit" value="Edit" /> <a onclick="CloseInput()" aria-label="Close">&#10006;</a>
+    <form action="javascript:void(0);" class="form-inline" method="POST" id="saveEdit">
+        <div id="edit-firstname-form" class="form-group">
+            <input type="text" class="form-input" id="edit-firstname" placeholder="firstname" onkeyup="return app.validateFirstname(true)">
+            <p class="help-text"></p>
+        </div>
+        <div id="edit-lastname-form" class="form-group">
+            <input type="text" class="form-input" id="edit-lastname" placeholder="lastname" onkeyup="return app.validateLastname(true)">
+            <p class="help-text"></p>
+        </div>
+        <div id="edit-email-form" class="form-group">
+            <input type="text" class="form-input" id="edit-email" placeholder="email" onkeyup="return app.validateEmail(true)">
+            <p class="help-text"></p>
+        </div>
+        <div id="edit-phone-form" class="form-group">
+            <input type="text" class="form-input" id="edit-phone" placeholder="phone" onkeyup="return app.validatePhone(true)">
+            <p class="help-text"></p>
+        </div>
+        <div class="form-group">
+            <input type="submit" class="form-btn primary" value="Edit" /> <a class="close-edit" onclick="CloseInput()" aria-label="Close">&#10006;</a>
+        </div>
     </form>
 </div>
-
 <p id="counter"></p>
-
-<table>
+<table class="table-bordered" cellspacing="0">
     <thead>
         <tr>
             <th>Firstname</th>
             <th>Lastname</th>
             <th>Email</th>
             <th>Phone</th>
-            <th style="width:1px;"></th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody id="staffs"></tbody>
 </table>
-
 <script>
     var app = new function () {
 
@@ -77,8 +103,8 @@
                     data += '<td>' + this.staffs[i].lastname + '</td>';
                     data += '<td>' + this.staffs[i].email + '</td>';
                     data += '<td>' + this.staffs[i].phone + '</td>';
-                    data += '<td><button onclick="app.Edit(' + this.staffs[i].id + ')">Edit</button></td>';
-                    data += '<td><button onclick="app.Delete(' + this.staffs[i].id + ')">Delete</button></td>';
+                    data += '<td><button class="form-btn primary" onclick="app.Edit(' + this.staffs[i].id + ')">Edit</button></td>';
+                    data += '<td><button class="form-btn primary" onclick="app.Delete(' + this.staffs[i].id + ')">Delete</button></td>';
                     data += '</tr>';
                 }
             }
@@ -87,7 +113,88 @@
             return this.el.innerHTML = data;
         };
 
+        this.requiredValidate = function (value) {
+            return !!value;
+        };
+        this.validateFirstname = function (forEdit) {
+            var cls = forEdit ? 'edit-' : '';
+            var firstnameText = document.getElementById(cls + 'firstname').value;
+            if (!this.requiredValidate(firstnameText)) {
+                $('#' + cls + 'firstname-form').addClass('has-error');
+                $('#' + cls + 'firstname-form .help-text').text('This field is required!');
+                return false;
+            }
+            $('#' + cls + 'firstname-form').removeClass('has-error');
+            $('#' + cls + 'firstname-form .help-text').text('');
+            return true;
+        }
+        this.validateLastname = function (forEdit) {
+            var cls = forEdit ? 'edit-' : '';
+            var lastnameText = document.getElementById(cls + 'lastname').value;
+            if (!this.requiredValidate(lastnameText)) {
+                $('#' + cls + 'lastname-form').addClass('has-error');
+                $('#' + cls + 'lastname-form .help-text').text('This field is required!');
+                return false;
+            }
+            $('#' + cls + 'lastname-form').removeClass('has-error');
+            $('#' + cls + 'lastname-form .help-text').text('');
+            return true;
+        }
+        this.validatePhone = function (forEdit) {
+            var cls = forEdit ? 'edit-' : '';
+            var phoneText = document.getElementById(cls + 'phone').value;
+            if (!this.requiredValidate(phoneText)) {
+                $('#' + cls + 'phone-form').addClass('has-error');
+                $('#' + cls + 'phone-form .help-text').text('Phone is required.');
+                return false;
+            }
+            if (!this.phoneValidate(phoneText)) {
+                $('#' + cls + 'phone-form').addClass('has-error');
+                $('#' + cls + 'phone-form .help-text').text('Phone is invalid format.');
+                return false;
+            }
+            $('#' + cls + 'phone-form').removeClass('has-error');
+            $('#' + cls + 'phone-form .help-text').text('');
+            return true;
+        }
+        this.validateEmail = function (forEdit) {
+            var cls = forEdit ? 'edit-' : '';
+            var emailText = document.getElementById(cls +'email').value;
+            if (!this.requiredValidate(emailText)) {
+                $('#' + cls + 'email-form').addClass('has-error');
+                $('#' + cls + 'email-form .help-text').text('Email is required.');
+                return false;
+            }
+            if (!this.emailValidate(emailText)) {
+                $('#' + cls + 'email-form').addClass('has-error');
+                $('#' + cls + 'email-form .help-text').text('Email is invalid format.');
+                return false;
+            }
+            $('#' + cls + 'email-form').removeClass('has-error');
+            $('#' + cls + 'email-form .help-text').text('');
+            return true;
+        }
+        this.phoneValidate = function (value) {
+            return !!value;
+        }
+        this.emailValidate = function (value) {
+            return !!value;
+        }
+        this.cleanValidation = function (form) {
+            $(form).find('.form-group').removeClass('has-error');
+            $(form).find('.help-text').text('');
+        }
         this.Add = function () {
+            this.cleanValidation($('#add-form'));
+
+            var isFirstnameValid = this.validateFirstname();
+            var isLastnameValid = this.validateLastname();
+            var isPhoneValid = this.validatePhone();
+            var isEmailValid = this.validateEmail();
+
+            if (!isFirstnameValid || !isLastnameValid || !isEmailValid || !isPhoneValid) return;
+
+
             var formData = new FormData();
             formData.append('firstname', document.getElementById('firstname').value);
             formData.append('lastname', document.getElementById('lastname').value);
@@ -125,6 +232,14 @@
             self = this;
 
             document.getElementById('saveEdit').onsubmit = function () {
+                self.cleanValidation($('#edit-form'), true);
+
+                var isFirstnameValid = self.validateFirstname(true);
+                var isLastnameValid = self.validateLastname(true);
+                var isPhoneValid = self.validatePhone(true);
+                var isEmailValid = self.validateEmail(true);
+
+                if (!isFirstnameValid || !isLastnameValid || !isEmailValid || !isPhoneValid) return;
                 var formData = new FormData();
                 formData.append('firstname', document.getElementById('edit-firstname').value);
                 formData.append('lastname', document.getElementById('edit-lastname').value);
@@ -148,7 +263,7 @@
                         CloseInput();
                     }
                 });
-                
+
             }
         };
 
