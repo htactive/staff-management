@@ -175,10 +175,12 @@
             return true;
         }
         this.phoneValidate = function (value) {
-            return !!value;
+            var filter = /^\d{4,10}$/;
+            return filter.test(value);
         }
         this.emailValidate = function (value) {
-            return !!value;
+            var filter = /^[a-zA-Z0-9_.-]+@@[a-zA-Z0-9]+[a-zA-Z0-9.-]+[a-zA-Z0-9]+.[a-z]{0,4}$/;
+            return filter.test(value);
         }
         this.cleanValidation = function (form) {
             $(form).find('.form-group').removeClass('has-error');
@@ -268,19 +270,22 @@
         };
 
         this.Delete = function (item) {
-            var self = this;
-            var formData = new FormData();
-            formData.append('id', item);
-            $.ajax({
-                url: '/api/staff/delete',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    self.Reload();
-                }
-            });
+            var r = confirm("Are you sure?");
+            if (r == true) {
+                var self = this;
+                var formData = new FormData();
+                formData.append('id', item);
+                $.ajax({
+                    url: '/api/staff/delete',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        self.Reload();
+                    }
+                });
+            }            
         };
 
         this.Reload = function () {
